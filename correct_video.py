@@ -18,7 +18,8 @@ class correct_video():
         self.save_path = os.path.join(self.video_folder_path, 'invert_list.npy')
         self.data_type_list = ['.mp4', '.MP4']
         self.args = self.parse_args()
-        self.run()
+        if self.is_folder_prepared():
+            self.run()
 
     def run(self):
         video_path_list = self.get_video_path_list()
@@ -45,13 +46,13 @@ class correct_video():
             while True:
                 ret, inp = cap.read()
                 if ret:
-                    frame += 1
                     if invert_list[i] == "1":
                         inp = cv2.rotate(inp, cv2.ROTATE_180)
                     out.write(inp)
                     #out_all.write(inp)
                 elif frame > 30:
                     break
+                frame += 1
             cap.release()
             out.release()
         #out_all.release()
@@ -88,7 +89,7 @@ class correct_video():
     def get_video_path_list(self):
         list = []
         if self.args.invert_video is not None:
-            list.append(os.path.join(self.video_folder_path, self.args.invert_video))
+            list.append(self.args.invert_video)
             return list
 
         for item in os.listdir(self.video_folder_path):
@@ -97,6 +98,17 @@ class correct_video():
                     list.append(os.path.join(self.video_folder_path, item))
         list.sort()
         return list
+
+    def is_folder_prepared(self):
+        if os.path.isdir(self.video_folder_path_new):
+            is_continue = input(self.video_folder_path_new+" alreay exist, do you want to continue?(Yes/No)")
+            if is_continue == "Yes":
+                return True
+            else:
+                return False
+        else:
+            os.mkdir(self.video_folder_path_new)
+            return True
 
 
 if __name__ == "__main__":
